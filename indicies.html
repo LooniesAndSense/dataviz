@@ -1,0 +1,4984 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Visualize the Markets: Major North American Indices</title>
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Color palette -->
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <style>
+      .node:hover {
+        stroke-width: 3px !important;
+        opacity: 1 !important;
+      }
+
+      .tooltip {
+        position: absolute;
+        text-align: center;
+        padding: 5px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 1px solid;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .viz-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      .sector-selector, .highlight-switch {
+            margin: 20px;
+        }
+        
+    </style>
+  </head>
+  <body>
+    <!-- Create a div where the graph will take place -->
+    <div id="my_dataviz" class="viz-container">
+        <label for="highlight-switch">Highlight intersection of S&P500 and NASDAQ100: </label>
+        <input type="checkbox" id="highlight-switch">
+    </div>
+    <script>
+      const data = [
+      {
+      "ticker": "MSFT",
+      "name": "Microsoft Corporation",
+      "marketcap": "3332.42",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "name": "Apple Inc",
+      "marketcap": "3322.44",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA Corporation",
+      "marketcap": "3222.11",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "GOOG/GOOGL",
+      "name": "Alphabet Inc.",
+      "marketcap": "2199.23",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "marketcap": "1915.44",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms, Inc.",
+      "marketcap": "1285.78",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AVGO",
+      "name": "Broadcom Inc.",
+      "marketcap": "851.32",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "name": "Tesla, Inc.",
+      "marketcap": "597.78",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "COST",
+      "name": "Costco Wholesale Corporation",
+      "marketcap": "384.77",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "NFLX",
+      "name": "Netflix, Inc.",
+      "marketcap": "291.26",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
+      "marketcap": "256.02",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "QCOM",
+      "name": "QUALCOMM Incorporated",
+      "marketcap": "248",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "name": "Adobe Inc.",
+      "marketcap": "232.4",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "name": "PepsiCo, Inc.",
+      "marketcap": "228.41",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "LIN",
+      "name": "Linde plc",
+      "marketcap": "211.82",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "TMUS",
+      "name": "T-Mobile US, Inc.",
+      "marketcap": "207.86",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AMAT",
+      "name": "Applied Materials, Inc.",
+      "marketcap": "201.08",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CSCO",
+      "name": "Cisco Systems, Inc.",
+      "marketcap": "184.08",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "TXN",
+      "name": "Texas Instruments Incorporated",
+      "marketcap": "177.45",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "INTU",
+      "name": "Intuit Inc.",
+      "marketcap": "168.43",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MU",
+      "name": "Micron Technology, Inc.",
+      "marketcap": "163.7",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AMGN",
+      "name": "Amgen Inc.",
+      "marketcap": "162.69",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ISRG",
+      "name": "Intuitive Surgical, Inc.",
+      "marketcap": "152.52",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CMCSA",
+      "name": "Comcast Corporation",
+      "marketcap": "146.04",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "LRCX",
+      "name": "Lam Research Corporation",
+      "marketcap": "140.12",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "HON",
+      "name": "Honeywell International Inc.",
+      "marketcap": "138.02",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "BKNG",
+      "name": "Booking Holdings Inc.",
+      "marketcap": "134.12",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "INTC",
+      "name": "Intel Corporation",
+      "marketcap": "131.88",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "VRTX",
+      "name": "Vertex Pharmaceuticals Incorporated",
+      "marketcap": "122.24",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ADI",
+      "name": "Analog Devices, Inc.",
+      "marketcap": "115.32",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "KLAC",
+      "name": "KLA Corporation",
+      "marketcap": "114.29",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "REGN",
+      "name": "Regeneron Pharmaceuticals, Inc.",
+      "marketcap": "113.28",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "PANW",
+      "name": "Palo Alto Networks, Inc.",
+      "marketcap": "103.48",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ADP",
+      "name": "Automatic Data Processing, Inc.",
+      "marketcap": "100.26",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ABNB",
+      "name": "Airbnb, Inc.",
+      "marketcap": "96.28",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "SNPS",
+      "name": "Synopsys, Inc.",
+      "marketcap": "93.88",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "SBUX",
+      "name": "Starbucks Corporation",
+      "marketcap": "92.12",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MDLZ",
+      "name": "Mondelez International, Inc.",
+      "marketcap": "88.64",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CDNS",
+      "name": "Cadence Design Systems, Inc.",
+      "marketcap": "87.65",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "GILD",
+      "name": "Gilead Sciences, Inc.",
+      "marketcap": "80.07",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CTAS",
+      "name": "Cintas Corporation",
+      "marketcap": "71.78",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MAR",
+      "name": "Marriott International, Inc.",
+      "marketcap": "69.89",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "NXPI",
+      "name": "NXP Semiconductors N.V.",
+      "marketcap": "69.36",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CEG",
+      "name": "Constellation Energy Corporation",
+      "marketcap": "66.84",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CSX",
+      "name": "CSX Corporation",
+      "marketcap": "63.75",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "PYPL",
+      "name": "PayPal Holdings, Inc.",
+      "marketcap": "62.9",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ORLY",
+      "name": "O'Reilly Automotive, Inc.",
+      "marketcap": "61.44",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ROP",
+      "name": "Roper Technologies, Inc.",
+      "marketcap": "59.26",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "PCAR",
+      "name": "PACCAR Inc",
+      "marketcap": "56.48",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MRNA",
+      "name": "Moderna, Inc.",
+      "marketcap": "52.85",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CPRT",
+      "name": "Copart, Inc.",
+      "marketcap": "52.3",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ADSK",
+      "name": "Autodesk, Inc.",
+      "marketcap": "51.95",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MNST",
+      "name": "Monster Beverage Corporation",
+      "marketcap": "51.18",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ROST",
+      "name": "Ross Stores, Inc.",
+      "marketcap": "50.16",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MCHP",
+      "name": "Microchip Technology Incorporated",
+      "marketcap": "48.87",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "KDP",
+      "name": "Keurig Dr Pepper Inc.",
+      "marketcap": "47.02",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "FTNT",
+      "name": "Fortinet, Inc.",
+      "marketcap": "46.52",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "DXCM",
+      "name": "DexCom, Inc.",
+      "marketcap": "46.34",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AEP",
+      "name": "American Electric Power Company, Inc.",
+      "marketcap": "46.25",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "PAYX",
+      "name": "Paychex, Inc.",
+      "marketcap": "44.89",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "IDXX",
+      "name": "IDEXX Laboratories, Inc.",
+      "marketcap": "41.65",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CHTR",
+      "name": "Charter Communications, Inc.",
+      "marketcap": "41.19",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "KHC",
+      "name": "The Kraft Heinz Company",
+      "marketcap": "39.97",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "VRSK",
+      "name": "Verisk Analytics, Inc.",
+      "marketcap": "38.19",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ODFL",
+      "name": "Old Dominion Freight Line, Inc.",
+      "marketcap": "37.79",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "LULU",
+      "name": "Lululemon Athletica Inc.",
+      "marketcap": "37.51",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "FAST",
+      "name": "Fastenal Company",
+      "marketcap": "36.88",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "EA",
+      "name": "Electronic Arts Inc.",
+      "marketcap": "36.64",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "GEHC",
+      "name": "GE HealthCare Technologies Inc.",
+      "marketcap": "35.4",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "EXC",
+      "name": "Exelon Corporation",
+      "marketcap": "35.17",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "FANG",
+      "name": "Diamondback Energy, Inc.",
+      "marketcap": "33.45",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "BIIB",
+      "name": "Biogen Inc.",
+      "marketcap": "32.97",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CTSH",
+      "name": "Cognizant Technology Solutions Corporation",
+      "marketcap": "32.58",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "BKR",
+      "name": "Baker Hughes Company",
+      "marketcap": "31.97",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ON",
+      "name": "ON Semiconductor Corporation",
+      "marketcap": "30.43",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CDW",
+      "name": "CDW Corporation",
+      "marketcap": "30.42",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CSGP",
+      "name": "CoStar Group, Inc.",
+      "marketcap": "29.9",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "XEL",
+      "name": "Xcel Energy Inc.",
+      "marketcap": "29.58",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ANSS",
+      "name": "ANSYS, Inc.",
+      "marketcap": "28.57",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "TTWO",
+      "name": "Take-Two Interactive Software, Inc.",
+      "marketcap": "27.55",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "DLTR",
+      "name": "Dollar Tree, Inc.",
+      "marketcap": "23.35",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "WBD",
+      "name": "Warner Bros. Discovery, Inc.",
+      "marketcap": "17.54",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ILMN",
+      "name": "Illumina, Inc.",
+      "marketcap": "17.37",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "WBA",
+      "name": "Walgreens Boots Alliance, Inc.",
+      "marketcap": "13.07",
+      "indices": [
+        "SP500",
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "BRK.B",
+      "name": "Berkshire Hathaway Inc.",
+      "marketcap": "880.02",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LLY",
+      "name": "Eli Lilly and Company",
+      "marketcap": "841.12",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "name": "JPMorgan Chase & Co.",
+      "marketcap": "559.92",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "V",
+      "name": "Visa Inc.",
+      "marketcap": "542.61",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WMT",
+      "name": "Walmart Inc.",
+      "marketcap": "542.3",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "name": "Exxon Mobil Corporation",
+      "marketcap": "486.1",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "name": "UnitedHealth Group Incorporated",
+      "marketcap": "450.28",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "name": "Mastercard Incorporated",
+      "marketcap": "413.37",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PG",
+      "name": "The Procter & Gamble Company",
+      "marketcap": "395.32",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ORCL",
+      "name": "Oracle Corporation",
+      "marketcap": "388.39",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "name": "Johnson & Johnson",
+      "marketcap": "351.25",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HD",
+      "name": "The Home Depot, Inc.",
+      "marketcap": "346.57",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MRK",
+      "name": "Merck & Co., Inc.",
+      "marketcap": "322.93",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "name": "Bank of America Corporation",
+      "marketcap": "308.98",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "name": "AbbVie Inc.",
+      "marketcap": "299.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CVX",
+      "name": "Chevron Corporation",
+      "marketcap": "282.32",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "name": "The Coca-Cola Company",
+      "marketcap": "269.76",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "name": "Salesforce, Inc.",
+      "marketcap": "223.34",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TMO",
+      "name": "Thermo Fisher Scientific Inc.",
+      "marketcap": "216.81",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "name": "Wells Fargo & Company",
+      "marketcap": "203.04",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DHR",
+      "name": "Danaher Corporation",
+      "marketcap": "188.23",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DIS",
+      "name": "The Walt Disney Company",
+      "marketcap": "185.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MCD",
+      "name": "McDonald's Corporation",
+      "marketcap": "182.78",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ABT",
+      "name": "Abbott Laboratories",
+      "marketcap": "179.96",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ACN",
+      "name": "Accenture plc",
+      "marketcap": "179.52",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GE",
+      "name": "GE Aerospace",
+      "marketcap": "178.67",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VZ",
+      "name": "Verizon Communications Inc.",
+      "marketcap": "166.1",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AXP",
+      "name": "American Express Company",
+      "marketcap": "164.2",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PM",
+      "name": "Philip Morris International Inc.",
+      "marketcap": "158.64",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "name": "Morgan Stanley",
+      "marketcap": "157.71",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "name": "Caterpillar Inc.",
+      "marketcap": "157.67",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IBM",
+      "name": "International Business Machines Corporation",
+      "marketcap": "155.7",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "name": "Pfizer Inc.",
+      "marketcap": "152.88",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NOW",
+      "name": "ServiceNow, Inc.",
+      "marketcap": "148.73",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "name": "NextEra Energy, Inc.",
+      "marketcap": "148.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BX",
+      "name": "Blackstone Inc.",
+      "marketcap": "147.7",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "UBER",
+      "name": "Uber Technologies, Inc.",
+      "marketcap": "147.29",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "name": "The Goldman Sachs Group, Inc.",
+      "marketcap": "145.17",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NKE",
+      "name": "NIKE, Inc.",
+      "marketcap": "143.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "name": "RTX Corp",
+      "marketcap": "138.89",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SPGI",
+      "name": "S&P Global Inc.",
+      "marketcap": "135.58",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "UNP",
+      "name": "Union Pacific Corporation",
+      "marketcap": "135.07",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SYK",
+      "name": "Stryker Corporation",
+      "marketcap": "131.31",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ETN",
+      "name": "Eaton Corporation plc",
+      "marketcap": "130.07",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SCHW",
+      "name": "The Charles Schwab Corporation",
+      "marketcap": "129.4",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LOW",
+      "name": "Lowe's Companies, Inc.",
+      "marketcap": "129.22",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "name": "Conoco Phillips",
+      "marketcap": "127.54",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "T",
+      "name": "AT&T Inc.",
+      "marketcap": "126.7",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TJX",
+      "name": "The TJX Companies, Inc.",
+      "marketcap": "124.57",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ELV",
+      "name": "Elevance Health Inc.",
+      "marketcap": "124.2",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PGR",
+      "name": "The Progressive Corporation",
+      "marketcap": "121.97",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "UPS",
+      "name": "United Parcel Service, Inc.",
+      "marketcap": "116.23",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BLK",
+      "name": "BlackRock, Inc.",
+      "marketcap": "116.07",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "C",
+      "name": "Citigroup Inc.",
+      "marketcap": "114.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BSX",
+      "name": "Boston Scientific Corporation",
+      "marketcap": "112.01",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LMT",
+      "name": "Lockheed Martin Corporation",
+      "marketcap": "110.13",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BA",
+      "name": "The Boeing Company",
+      "marketcap": "109.51",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ANET",
+      "name": "Arista Networks, Inc.",
+      "marketcap": "106.57",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CB",
+      "name": "Chubb Limited",
+      "marketcap": "105.87",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MDT",
+      "name": "Medtronic plc",
+      "marketcap": "104.84",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DE",
+      "name": "Deere & Company",
+      "marketcap": "104.5",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MMC",
+      "name": "Marsh & McLennan Companies, Inc.",
+      "marketcap": "104.39",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PLD",
+      "name": "Prologis, Inc.",
+      "marketcap": "103.03",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CI",
+      "name": "Cigna Corporation",
+      "marketcap": "94.85",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CMG",
+      "name": "Chipotle Mexican Grill, Inc.",
+      "marketcap": "92.44",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AMT",
+      "name": "American Tower Corporation",
+      "marketcap": "89.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HCA",
+      "name": "HCA Healthcare, Inc.",
+      "marketcap": "87.86",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FI",
+      "name": "Fiserv, Inc.",
+      "marketcap": "87.61",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SO",
+      "name": "The Southern Company",
+      "marketcap": "84.94",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "APH",
+      "name": "Amphenol Corporation",
+      "marketcap": "83.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BMY",
+      "name": "Bristol-Myers Squibb Company",
+      "marketcap": "83.05",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WM",
+      "name": "Waste Management, Inc.",
+      "marketcap": "82.78",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GD",
+      "name": "General Dynamics Corporation",
+      "marketcap": "80.62",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CL",
+      "name": "Colgate-Palmolive Company",
+      "marketcap": "78.72",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ICE",
+      "name": "Intercontinental Exchange, Inc.",
+      "marketcap": "78.12",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ZTS",
+      "name": "Zoetis Inc.",
+      "marketcap": "77.98",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "name": "Duke Energy Corporation",
+      "marketcap": "77.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MCK",
+      "name": "McKesson Corporation",
+      "marketcap": "77.5",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SHW",
+      "name": "The Sherwin-Williams Company",
+      "marketcap": "76.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MO",
+      "name": "Altria Group, Inc.",
+      "marketcap": "76.78",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CVS",
+      "name": "CVS Health Corporation",
+      "marketcap": "76.69",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TT",
+      "name": "Trane Technologies plc",
+      "marketcap": "75.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MCO",
+      "name": "Moody's Corporation",
+      "marketcap": "75.29",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TDG",
+      "name": "TransDigm Group Incorporated",
+      "marketcap": "73.8",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EQIX",
+      "name": "Equinix, Inc.",
+      "marketcap": "72.35",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ITW",
+      "name": "Illinois Tool Works Inc.",
+      "marketcap": "71.3",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CME",
+      "name": "CME Group Inc.",
+      "marketcap": "70.78",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ECL",
+      "name": "Ecolab Inc.",
+      "marketcap": "69.45",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EOG",
+      "name": "EOG Resources, Inc.",
+      "marketcap": "68.44",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FCX",
+      "name": "Freeport-McMoRan Inc.",
+      "marketcap": "67.89",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BDX",
+      "name": "Becton, Dickinson and Company",
+      "marketcap": "67.27",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TGT",
+      "name": "Target Corporation",
+      "marketcap": "67.07",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AON",
+      "name": "Aon plc",
+      "marketcap": "65.23",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PH",
+      "name": "Parker-Hannifin Corporation",
+      "marketcap": "65.05",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MSI",
+      "name": "Motorola Solutions, Inc.",
+      "marketcap": "63.85",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NOC",
+      "name": "Northrop Grumman Corporation",
+      "marketcap": "63.6",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SLB",
+      "name": "Schlumberger Limited",
+      "marketcap": "62.36",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WELL",
+      "name": "Welltower Inc.",
+      "marketcap": "62.06",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FDX",
+      "name": "FedEx Corporation",
+      "marketcap": "61.54",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EMR",
+      "name": "Emerson Electric Co.",
+      "marketcap": "61.43",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "name": "U.S. Bancorp",
+      "marketcap": "61",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PNC",
+      "name": "The PNC Financial Services Group, Inc.",
+      "marketcap": "60.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "APD",
+      "name": "Air Products and Chemicals, Inc.",
+      "marketcap": "60.71",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MPC",
+      "name": "Marathon Petroleum Corporation",
+      "marketcap": "60.51",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RSG",
+      "name": "Republic Services, Inc.",
+      "marketcap": "60.37",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CARR",
+      "name": "Carrier Global Corporation",
+      "marketcap": "58.67",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PSX",
+      "name": "Phillips 66",
+      "marketcap": "58.2",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AJG",
+      "name": "Arthur J. Gallagher & Co.",
+      "marketcap": "57.06",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MMM",
+      "name": "3M Company",
+      "marketcap": "55.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GM",
+      "name": "General Motors Company",
+      "marketcap": "54.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HLT",
+      "name": "Hilton Worldwide Holdings Inc.",
+      "marketcap": "53.66",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "OXY",
+      "name": "Occidental Petroleum Corporation",
+      "marketcap": "53.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "COF",
+      "name": "Capital One Financial Corporation",
+      "marketcap": "52.36",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EW",
+      "name": "Edwards Lifesciences Corporation",
+      "marketcap": "52.35",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SMCI",
+      "name": "Super Micro Computer, Inc.",
+      "marketcap": "51.96",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WMB",
+      "name": "The Williams Companies, Inc.",
+      "marketcap": "50.29",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AZO",
+      "name": "AutoZone, Inc.",
+      "marketcap": "50.2",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AFL",
+      "name": "Aflac Incorporated",
+      "marketcap": "49.98",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NSC",
+      "name": "Norfolk Southern Corporation",
+      "marketcap": "49.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PSA",
+      "name": "Public Storage",
+      "marketcap": "49.87",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VLO",
+      "name": "Valero Energy Corporation",
+      "marketcap": "49.41",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MET",
+      "name": "MetLife, Inc.",
+      "marketcap": "49.34",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AIG",
+      "name": "American International Group, Inc.",
+      "marketcap": "49.1",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SPG",
+      "name": "Simon Property Group, Inc.",
+      "marketcap": "48.13",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DLR",
+      "name": "Digital Realty Trust, Inc.",
+      "marketcap": "48.12",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TFC",
+      "name": "Truist Financial Corporation",
+      "marketcap": "47.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "STZ",
+      "name": "Constellation Brands, Inc.",
+      "marketcap": "47.84",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TRV",
+      "name": "The Travelers Companies, Inc.",
+      "marketcap": "47.66",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SRE",
+      "name": "Sempra",
+      "marketcap": "47.36",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KMB",
+      "name": "Kimberly-Clark Corporation",
+      "marketcap": "47.29",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DHI",
+      "name": "D.R. Horton, Inc.",
+      "marketcap": "47.18",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NEM",
+      "name": "Newmont Corporation",
+      "marketcap": "47.17",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "COR",
+      "name": "Cencora",
+      "marketcap": "46.81",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "JCI",
+      "name": "Johnson Controls International plc",
+      "marketcap": "46.69",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "F",
+      "name": "Ford Motor Company",
+      "marketcap": "46.47",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GEV",
+      "name": "GE Vernova Inc.",
+      "marketcap": "46.25",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "O",
+      "name": "Realty Income Corporation",
+      "marketcap": "46.21",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "OKE",
+      "name": "ONEOK, Inc.",
+      "marketcap": "46.14",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TEL",
+      "name": "TE Connectivity Ltd.",
+      "marketcap": "45.99",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GWW",
+      "name": "W.W. Grainger, Inc.",
+      "marketcap": "45.02",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HES",
+      "name": "Hess Corporation",
+      "marketcap": "44.24",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KMI",
+      "name": "Kinder Morgan, Inc.",
+      "marketcap": "43.66",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BK",
+      "name": "The Bank of New York Mellon Corporation",
+      "marketcap": "43.5",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LEN",
+      "name": "Lennar Corporation",
+      "marketcap": "43.13",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AMP",
+      "name": "Ameriprise Financial, Inc.",
+      "marketcap": "42.96",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HUM",
+      "name": "Humana Inc.",
+      "marketcap": "42.81",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FIS",
+      "name": "Fidelity National Information Services, Inc.",
+      "marketcap": "42.34",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ALL",
+      "name": "The Allstate Corporation",
+      "marketcap": "41.87",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CCI",
+      "name": "Crown Castle Inc.",
+      "marketcap": "41.86",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LHX",
+      "name": "L3Harris Technologies, Inc.",
+      "marketcap": "41.86",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "D",
+      "name": "Dominion Energy, Inc.",
+      "marketcap": "41.45",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "URI",
+      "name": "United Rentals, Inc.",
+      "marketcap": "41.24",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EL",
+      "name": "The Estée Lauder Companies Inc.",
+      "marketcap": "41.19",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PRU",
+      "name": "Prudential Financial, Inc.",
+      "marketcap": "41.11",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PWR",
+      "name": "Quanta Services, Inc.",
+      "marketcap": "40.49",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MPWR",
+      "name": "Monolithic Power Systems, Inc.",
+      "marketcap": "40.27",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "OTIS",
+      "name": "Otis Worldwide Corporation",
+      "marketcap": "39.41",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AME",
+      "name": "AMETEK, Inc.",
+      "marketcap": "39.01",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IQV",
+      "name": "IQVIA Holdings Inc.",
+      "marketcap": "38.87",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DOW",
+      "name": "Dow Inc.",
+      "marketcap": "38.84",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "YUM",
+      "name": "Yum! Brands, Inc.",
+      "marketcap": "38.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "A",
+      "name": "Agilent Technologies, Inc.",
+      "marketcap": "38.46",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MSCI",
+      "name": "MSCI Inc.",
+      "marketcap": "38.41",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RCL",
+      "name": "Royal Caribbean Cruises Ltd.",
+      "marketcap": "38.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PCG",
+      "name": "PG&E Corporation",
+      "marketcap": "38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NUE",
+      "name": "Nucor Corporation",
+      "marketcap": "37.73",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IR",
+      "name": "Ingersoll Rand Inc.",
+      "marketcap": "37.64",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GIS",
+      "name": "General Mills, Inc.",
+      "marketcap": "37.42",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ACGL",
+      "name": "Arch Capital Group Ltd.",
+      "marketcap": "37.25",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KR",
+      "name": "The Kroger Co.",
+      "marketcap": "37.14",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HSY",
+      "name": "The Hershey Company",
+      "marketcap": "37.02",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CMI",
+      "name": "Cummins Inc.",
+      "marketcap": "36.92",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CNC",
+      "name": "Centene Corporation",
+      "marketcap": "36.4",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PEG",
+      "name": "Public Service Enterprise Group Incorporated",
+      "marketcap": "36.39",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SYY",
+      "name": "Sysco Corporation",
+      "marketcap": "36.32",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CTVA",
+      "name": "Corteva, Inc.",
+      "marketcap": "36.27",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KVUE",
+      "name": "Kenvue Inc.",
+      "marketcap": "35.98",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MLM",
+      "name": "Martin Marietta Materials, Inc.",
+      "marketcap": "35.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HPQ",
+      "name": "HP Inc.",
+      "marketcap": "35.16",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FICO",
+      "name": "Fair Isaac Corporation",
+      "marketcap": "34.84",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IT",
+      "name": "Gartner, Inc.",
+      "marketcap": "34.37",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VMC",
+      "name": "Vulcan Materials Company",
+      "marketcap": "33.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "XYL",
+      "name": "Xylem Inc.",
+      "marketcap": "33.83",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NDAQ",
+      "name": "NASDAQ100, Inc.",
+      "marketcap": "33.8",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DD",
+      "name": "DuPont de Nemours, Inc.",
+      "marketcap": "33.62",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GLW",
+      "name": "Corning Incorporated",
+      "marketcap": "33.19",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LVS",
+      "name": "Las Vegas Sands Corp.",
+      "marketcap": "33.04",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EXR",
+      "name": "Extra Space Storage Inc.",
+      "marketcap": "32.8",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HWM",
+      "name": "Howmet Aerospace Inc.",
+      "marketcap": "32.65",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DAL",
+      "name": "Delta Air Lines, Inc.",
+      "marketcap": "32.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DFS",
+      "name": "Discover Financial Services",
+      "marketcap": "31.5",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ED",
+      "name": "Consolidated Edison, Inc.",
+      "marketcap": "31.35",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TSCO",
+      "name": "Tractor Supply Company",
+      "marketcap": "31.22",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MTD",
+      "name": "Mettler-Toledo International Inc.",
+      "marketcap": "30.92",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RMD",
+      "name": "ResMed Inc.",
+      "marketcap": "30.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GRMN",
+      "name": "Garmin Ltd.",
+      "marketcap": "30.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LYB",
+      "name": "LyondellBasell Industries N.V.",
+      "marketcap": "30.59",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PPG",
+      "name": "PPG Industries, Inc.",
+      "marketcap": "30.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HIG",
+      "name": "The Hartford Financial Services Group, Inc.",
+      "marketcap": "29.94",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ADM",
+      "name": "Archer-Daniels-Midland Company",
+      "marketcap": "29.75",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HAL",
+      "name": "Halliburton Company",
+      "marketcap": "29.58",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EFX",
+      "name": "Equifax Inc.",
+      "marketcap": "29.55",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ROK",
+      "name": "Rockwell Automation, Inc.",
+      "marketcap": "29.47",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VICI",
+      "name": "VICI Properties Inc.",
+      "marketcap": "29.42",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VST",
+      "name": "Vistra Corp.",
+      "marketcap": "29.2",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DVN",
+      "name": "Devon Energy Corporation",
+      "marketcap": "28.92",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AVB",
+      "name": "AvalonBay Communities, Inc.",
+      "marketcap": "28.66",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WAB",
+      "name": "Westinghouse Air Brake Technologies Corporation",
+      "marketcap": "28.51",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HPE",
+      "name": "Hewlett Packard Enterprise Company",
+      "marketcap": "28.15",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FSLR",
+      "name": "First Solar, Inc.",
+      "marketcap": "27.97",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DG",
+      "name": "Dollar General Corporation",
+      "marketcap": "27.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EIX",
+      "name": "Edison International",
+      "marketcap": "27.52",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TRGP",
+      "name": "Targa Resources Corp.",
+      "marketcap": "26.96",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CBRE",
+      "name": "CBRE Group, Inc.",
+      "marketcap": "26.81",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CHD",
+      "name": "Church & Dwight Co., Inc.",
+      "marketcap": "26.73",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EBAY",
+      "name": "eBay Inc.",
+      "marketcap": "26.68",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BRO",
+      "name": "Brown & Brown, Inc.",
+      "marketcap": "26.24",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WTW",
+      "name": "Willis Towers Watson PLC",
+      "marketcap": "26.22",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TROW",
+      "name": "T. Rowe Price Group, Inc.",
+      "marketcap": "26.14",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WDC",
+      "name": "Western Digital Corporation",
+      "marketcap": "26.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NTAP",
+      "name": "NetApp, Inc.",
+      "marketcap": "25.94",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DECK",
+      "name": "Deckers Outdoor Corporation",
+      "marketcap": "25.89",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IRM",
+      "name": "Iron Mountain Incorporated",
+      "marketcap": "25.87",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FTV",
+      "name": "Fortive Corporation",
+      "marketcap": "25.77",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EQR",
+      "name": "Equity Residential",
+      "marketcap": "25.39",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AWK",
+      "name": "American Water Works Company, Inc.",
+      "marketcap": "25.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VLTO",
+      "name": "Veralto Corporation",
+      "marketcap": "24.83",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WEC",
+      "name": "WEC Energy Group, Inc.",
+      "marketcap": "24.75",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DOV",
+      "name": "Dover Corporation",
+      "marketcap": "24.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CAH",
+      "name": "Cardinal Health, Inc.",
+      "marketcap": "24.59",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WST",
+      "name": "West Pharmaceutical Services, Inc.",
+      "marketcap": "24.48",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RJF",
+      "name": "Raymond James Financial, Inc.",
+      "marketcap": "24.45",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FITB",
+      "name": "Fifth Third Bancorp",
+      "marketcap": "24.39",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IFF",
+      "name": "International Flavors & Fragrances Inc.",
+      "marketcap": "24.21",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MTB",
+      "name": "M&T Bank Corporation",
+      "marketcap": "24.16",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NVR",
+      "name": "NVR, Inc.",
+      "marketcap": "24.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PHM",
+      "name": "PulteGroup, Inc.",
+      "marketcap": "24.07",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GPN",
+      "name": "Global Payments Inc.",
+      "marketcap": "23.97",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KEYS",
+      "name": "Keysight Technologies, Inc.",
+      "marketcap": "23.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ROL",
+      "name": "Rollins, Inc.",
+      "marketcap": "23.85",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BR",
+      "name": "Broadridge Financial Solutions, Inc.",
+      "marketcap": "23.36",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DTE",
+      "name": "DTE Energy Company",
+      "marketcap": "22.92",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ETR",
+      "name": "Entergy Corporation",
+      "marketcap": "22.71",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TER",
+      "name": "Teradyne, Inc.",
+      "marketcap": "22.6",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AXON",
+      "name": "Axon Enterprise, Inc.",
+      "marketcap": "22.43",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "STX",
+      "name": "Seagate Technology Holdings plc",
+      "marketcap": "22.25",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ZBH",
+      "name": "Zimmer Biomet Holdings, Inc.",
+      "marketcap": "22.02",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FE",
+      "name": "FirstEnergy Corp.",
+      "marketcap": "22.01",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "INVH",
+      "name": "Invitation Homes Inc.",
+      "marketcap": "21.75",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "STT",
+      "name": "State Street Corporation",
+      "marketcap": "21.6",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "STE",
+      "name": "STERIS plc",
+      "marketcap": "21.36",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WY",
+      "name": "Weyerhaeuser Company",
+      "marketcap": "21.25",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BF.B",
+      "name": "Brown-Forman Corporation",
+      "marketcap": "20.92",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LYV",
+      "name": "Live Nation Entertainment, Inc.",
+      "marketcap": "20.78",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PTC",
+      "name": "PTC Inc.",
+      "marketcap": "20.68",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BALL",
+      "name": "Ball Corporation",
+      "marketcap": "20.62",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PPL",
+      "name": "PPL Corporation",
+      "marketcap": "20.59",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SBAC",
+      "name": "SBA Communications Corporation",
+      "marketcap": "20.54",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HUBB",
+      "name": "Hubbell Incorporated",
+      "marketcap": "20.49",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WRB",
+      "name": "W. R. Berkley Corporation",
+      "marketcap": "20.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ES",
+      "name": "Eversource Energy",
+      "marketcap": "20.31",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VTR",
+      "name": "Ventas, Inc.",
+      "marketcap": "20.24",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ARE",
+      "name": "Alexandria Real Estate Equities, Inc.",
+      "marketcap": "20.14",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "STLD",
+      "name": "Steel Dynamics, Inc.",
+      "marketcap": "19.89",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "K",
+      "name": "Kellanova Co",
+      "marketcap": "19.87",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CTRA",
+      "name": "Coterra Energy Inc.",
+      "marketcap": "19.85",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TYL",
+      "name": "Tyler Technologies, Inc.",
+      "marketcap": "19.84",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BBY",
+      "name": "Best Buy Co., Inc.",
+      "marketcap": "19.69",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CNP",
+      "name": "CenterPoint Energy, Inc.",
+      "marketcap": "19.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CCL",
+      "name": "Carnival Corporation & plc",
+      "marketcap": "19.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GPC",
+      "name": "Genuine Parts Company",
+      "marketcap": "19.49",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LDOS",
+      "name": "Leidos Holdings, Inc.",
+      "marketcap": "19.45",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TSN",
+      "name": "Tyson Foods, Inc.",
+      "marketcap": "19.41",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "APTV",
+      "name": "Aptiv PLC",
+      "marketcap": "19.3",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AEE",
+      "name": "Ameren Corporation",
+      "marketcap": "18.77",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MKC",
+      "name": "McCormick & Company, Incorporated",
+      "marketcap": "18.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ULTA",
+      "name": "Ulta Beauty, Inc.",
+      "marketcap": "18.57",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DPZ",
+      "name": "Domino's Pizza, Inc.",
+      "marketcap": "18.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ALGN",
+      "name": "Align Technology, Inc.",
+      "marketcap": "18.48",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "COO",
+      "name": "The Cooper Companies, Inc.",
+      "marketcap": "18.41",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AVY",
+      "name": "Avery Dennison Corporation",
+      "marketcap": "18.4",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TDY",
+      "name": "Teledyne Technologies Incorporated",
+      "marketcap": "18.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DRI",
+      "name": "Darden Restaurants, Inc.",
+      "marketcap": "18.33",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BLDR",
+      "name": "Builders FirstSource, Inc.",
+      "marketcap": "18.3",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PFG",
+      "name": "Principal Financial Group, Inc.",
+      "marketcap": "18.25",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ESS",
+      "name": "Essex Property Trust, Inc.",
+      "marketcap": "18.06",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MOH",
+      "name": "Molina Healthcare, Inc.",
+      "marketcap": "18.05",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HBAN",
+      "name": "Huntington Bancshares Incorporated",
+      "marketcap": "17.96",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CBOE",
+      "name": "Cboe Global Markets, Inc.",
+      "marketcap": "17.82",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CINF",
+      "name": "Cincinnati Financial Corporation",
+      "marketcap": "17.82",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VRSN",
+      "name": "VeriSign, Inc.",
+      "marketcap": "17.76",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CPAY",
+      "name": "Corpay, Inc.",
+      "marketcap": "17.71",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CMS",
+      "name": "CMS Energy Corporation",
+      "marketcap": "17.7",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "OMC",
+      "name": "Omnicom Group Inc.",
+      "marketcap": "17.64",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "J",
+      "name": "Jacobs Engineering Group Inc.",
+      "marketcap": "17.62",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ATO",
+      "name": "Atmos Energy Corporation",
+      "marketcap": "17.55",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EXPD",
+      "name": "Expeditors International of Washington, Inc.",
+      "marketcap": "17.48",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WAT",
+      "name": "Waters Corporation",
+      "marketcap": "17.45",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RF",
+      "name": "Regions Financial Corporation",
+      "marketcap": "17.31",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SYF",
+      "name": "Synchrony Financial",
+      "marketcap": "17.3",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BAX",
+      "name": "Baxter International Inc.",
+      "marketcap": "17.28",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LUV",
+      "name": "Southwest Airlines Co.",
+      "marketcap": "17.22",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CLX",
+      "name": "The Clorox Company",
+      "marketcap": "17.13",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SWKS",
+      "name": "Skyworks Solutions, Inc.",
+      "marketcap": "17.06",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EQT",
+      "name": "EQT Corporation",
+      "marketcap": "17.03",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LH",
+      "name": "Labcorp Holdings Inc.",
+      "marketcap": "16.99",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HRL",
+      "name": "Hormel Foods Corporation",
+      "marketcap": "16.85",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NTRS",
+      "name": "Northern Trust Corporation",
+      "marketcap": "16.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HOLX",
+      "name": "Hologic, Inc.",
+      "marketcap": "16.67",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "L",
+      "name": "Loews Corporation",
+      "marketcap": "16.65",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PKG",
+      "name": "Packaging Corporation of America",
+      "marketcap": "16.62",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "UAL",
+      "name": "United Airlines Holdings, Inc.",
+      "marketcap": "16.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ENPH",
+      "name": "Enphase Energy, Inc.",
+      "marketcap": "16.44",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TXT",
+      "name": "Textron Inc.",
+      "marketcap": "16.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NRG",
+      "name": "NRG Energy, Inc.",
+      "marketcap": "16.38",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EG",
+      "name": "Everest Group, Ltd.",
+      "marketcap": "16.36",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "JBHT",
+      "name": "J.B. Hunt Transport Services, Inc.",
+      "marketcap": "16.31",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MAA",
+      "name": "Mid-America Apartment Communities, Inc.",
+      "marketcap": "16.28",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IP",
+      "name": "International Paper Company",
+      "marketcap": "15.76",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EXPE",
+      "name": "Expedia Group, Inc.",
+      "marketcap": "15.75",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CFG",
+      "name": "Citizens Financial Group, Inc.",
+      "marketcap": "15.7",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ZBRA",
+      "name": "Zebra Technologies Corporation",
+      "marketcap": "15.55",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FDS",
+      "name": "FactSet Research Systems Inc.",
+      "marketcap": "15.5",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NWS",
+      "name": "News Corporation",
+      "marketcap": "15.42",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NWSA",
+      "name": "News Corporation",
+      "marketcap": "15.42",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MRO",
+      "name": "Marathon Oil Corporation",
+      "marketcap": "15.41",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MAS",
+      "name": "Masco Corporation",
+      "marketcap": "15.31",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DGX",
+      "name": "Quest Diagnostics Incorporated",
+      "marketcap": "15.22",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CE",
+      "name": "Celanese Corporation",
+      "marketcap": "15.22",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IEX",
+      "name": "IDEX Corporation",
+      "marketcap": "15.16",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FOXA",
+      "name": "Fox Corporation",
+      "marketcap": "15.08",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "JBL",
+      "name": "Jabil Inc.",
+      "marketcap": "15.01",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FOX",
+      "name": "Fox Corporation",
+      "marketcap": "15",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GEN",
+      "name": "Gen Digital Inc.",
+      "marketcap": "14.83",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BG",
+      "name": "Bunge Limited",
+      "marketcap": "14.58",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AMCR",
+      "name": "Amcor plc",
+      "marketcap": "14.4",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SNA",
+      "name": "Snap-on Incorporated",
+      "marketcap": "14.14",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "INCY",
+      "name": "Incyte Corporation",
+      "marketcap": "14.1",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PODD",
+      "name": "Insulet Corporation",
+      "marketcap": "13.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CAG",
+      "name": "Conagra Brands, Inc.",
+      "marketcap": "13.72",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DOC",
+      "name": "Healthpeak Properties, Inc.",
+      "marketcap": "13.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TRMB",
+      "name": "Trimble Inc.",
+      "marketcap": "13.61",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AKAM",
+      "name": "Akamai Technologies, Inc.",
+      "marketcap": "13.57",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CF",
+      "name": "CF Industries Holdings, Inc.",
+      "marketcap": "13.53",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CPB",
+      "name": "Campbell Soup Company",
+      "marketcap": "13.41",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AES",
+      "name": "The AES Corporation",
+      "marketcap": "13.39",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NDSN",
+      "name": "Nordson Corporation",
+      "marketcap": "13.29",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "UDR",
+      "name": "UDR, Inc.",
+      "marketcap": "13.28",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RVTY",
+      "name": "Revvity, Inc.",
+      "marketcap": "13.25",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "POOL",
+      "name": "Pool Corporation",
+      "marketcap": "13.15",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SWK",
+      "name": "Stanley Black & Decker, Inc.",
+      "marketcap": "12.98",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PNR",
+      "name": "Pentair plc",
+      "marketcap": "12.95",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WRK",
+      "name": "WestRock Company",
+      "marketcap": "12.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KEY",
+      "name": "KeyCorp",
+      "marketcap": "12.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LNT",
+      "name": "Alliant Energy Corporation",
+      "marketcap": "12.73",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MGM",
+      "name": "MGM Resorts International",
+      "marketcap": "12.67",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HST",
+      "name": "Host Hotels & Resorts, Inc.",
+      "marketcap": "12.66",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KIM",
+      "name": "Kimco Realty Corporation",
+      "marketcap": "12.59",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LW",
+      "name": "Lamb Weston Holdings, Inc.",
+      "marketcap": "12.58",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NI",
+      "name": "NiSource Inc.",
+      "marketcap": "12.55",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DVA",
+      "name": "DaVita Inc.",
+      "marketcap": "12.39",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AOS",
+      "name": "A. O. Smith Corporation",
+      "marketcap": "12.27",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EVRG",
+      "name": "Evergy, Inc.",
+      "marketcap": "12.1",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "VTRS",
+      "name": "Viatris Inc.",
+      "marketcap": "12.04",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "JKHY",
+      "name": "Jack Henry & Associates, Inc.",
+      "marketcap": "12.03",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SJM",
+      "name": "The J. M. Smucker Company",
+      "marketcap": "11.91",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ALB",
+      "name": "Albemarle Corporation",
+      "marketcap": "11.83",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TECH",
+      "name": "Bio-Techne Corporation",
+      "marketcap": "11.79",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EMN",
+      "name": "Eastman Chemical Company",
+      "marketcap": "11.67",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BEN",
+      "name": "Franklin Resources, Inc.",
+      "marketcap": "11.66",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CPT",
+      "name": "Camden Property Trust",
+      "marketcap": "11.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "JNPR",
+      "name": "Juniper Networks, Inc.",
+      "marketcap": "11.54",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RL",
+      "name": "Ralph Lauren Corporation",
+      "marketcap": "11.44",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "REG",
+      "name": "Regency Centers Corporation",
+      "marketcap": "11.35",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "UHS",
+      "name": "Universal Health Services, Inc.",
+      "marketcap": "11.33",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "KMX",
+      "name": "CarMax, Inc.",
+      "marketcap": "11.28",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IPG",
+      "name": "The Interpublic Group of Companies, Inc.",
+      "marketcap": "11.16",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "QRVO",
+      "name": "Qorvo, Inc.",
+      "marketcap": "10.92",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "LKQ",
+      "name": "LKQ Corporation",
+      "marketcap": "10.87",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CRL",
+      "name": "Charles River Laboratories International, Inc.",
+      "marketcap": "10.74",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TAP",
+      "name": "Molson Coors Beverage Company",
+      "marketcap": "10.65",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "APA",
+      "name": "APA Corporation",
+      "marketcap": "10.37",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ALLE",
+      "name": "Allegion plc",
+      "marketcap": "10.16",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "EPAM",
+      "name": "EPAM Systems, Inc.",
+      "marketcap": "10.11",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CHRW",
+      "name": "C.H. Robinson Worldwide, Inc.",
+      "marketcap": "10.05",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CTLT",
+      "name": "Catalent, Inc.",
+      "marketcap": "9.99",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "WYNN",
+      "name": "Wynn Resorts, Limited",
+      "marketcap": "9.95",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FFIV",
+      "name": "F5, Inc.",
+      "marketcap": "9.83",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TFX",
+      "name": "Teleflex Incorporated",
+      "marketcap": "9.69",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BXP",
+      "name": "Boston Properties, Inc.",
+      "marketcap": "9.65",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "TPR",
+      "name": "Tapestry, Inc.",
+      "marketcap": "9.63",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HII",
+      "name": "Huntington Ingalls Industries, Inc.",
+      "marketcap": "9.54",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "SOLV",
+      "name": "Solventum Corporation",
+      "marketcap": "9.44",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BBWI",
+      "name": "Bath & Body Works, Inc.",
+      "marketcap": "9.4",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AIZ",
+      "name": "Assurant, Inc.",
+      "marketcap": "8.73",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MOS",
+      "name": "The Mosaic Company",
+      "marketcap": "8.65",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PNW",
+      "name": "Pinnacle West Capital Corporation",
+      "marketcap": "8.61",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HAS",
+      "name": "Hasbro, Inc.",
+      "marketcap": "8.57",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "HSIC",
+      "name": "Henry Schein, Inc.",
+      "marketcap": "8.47",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BIO",
+      "name": "Bio-Rad Laboratories, Inc.",
+      "marketcap": "8.45",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FRT",
+      "name": "Federal Realty Investment Trust",
+      "marketcap": "8.34",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PAYC",
+      "name": "Paycom Software, Inc.",
+      "marketcap": "8.3",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GNRC",
+      "name": "Generac Holdings Inc.",
+      "marketcap": "8.24",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MTCH",
+      "name": "Match Group, Inc.",
+      "marketcap": "8.11",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "DAY",
+      "name": "Dayforce Inc",
+      "marketcap": "7.9",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CZR",
+      "name": "Caesars Entertainment, Inc.",
+      "marketcap": "7.82",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "BWA",
+      "name": "BorgWarner Inc.",
+      "marketcap": "7.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MKTX",
+      "name": "MarketAxess Holdings Inc.",
+      "marketcap": "7.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "AAL",
+      "name": "American Airlines Group Inc.",
+      "marketcap": "7.51",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "GL",
+      "name": "Globe Life Inc.",
+      "marketcap": "7.37",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "NCLH",
+      "name": "Norwegian Cruise Line Holdings Ltd.",
+      "marketcap": "7.26",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "MHK",
+      "name": "Mohawk Industries, Inc.",
+      "marketcap": "7.18",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "FMC",
+      "name": "FMC Corporation",
+      "marketcap": "6.98",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "PARA",
+      "name": "Paramount Global",
+      "marketcap": "6.86",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ETSY",
+      "name": "Etsy, Inc.",
+      "marketcap": "6.86",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "RHI",
+      "name": "Robert Half International Inc.",
+      "marketcap": "6.71",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "IVZ",
+      "name": "Invesco Ltd.",
+      "marketcap": "6.56",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "CMA",
+      "name": "Comerica Incorporated",
+      "marketcap": "6.24",
+      "indices": [
+        "SP500"
+      ]
+    },
+    {
+      "ticker": "ASML",
+      "name": "ASML Holding N.V.",
+      "marketcap": "412.79",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "AZN",
+      "name": "AstraZeneca PLC",
+      "marketcap": "245.07",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "PDD",
+      "name": "PDD Holdings Inc.",
+      "marketcap": "194.23",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CRWD",
+      "name": "CrowdStrike Holdings, Inc.",
+      "marketcap": "94.60",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MELI",
+      "name": "MercadoLibre, Inc.",
+      "marketcap": "78.84",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MRVL",
+      "name": "Marvell Technology, Inc.",
+      "marketcap": "62.53",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "WDAY",
+      "name": "Workday, Inc.",
+      "marketcap": "56.20",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "TTD",
+      "name": "The Trade Desk, Inc.",
+      "marketcap": "47.86",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "DASH",
+      "name": "DoorDash, Inc.",
+      "marketcap": "46.17",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "TEAM",
+      "name": "Atlassian Corporation",
+      "marketcap": "40.43",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "DDOG",
+      "name": "Datadog, Inc.",
+      "marketcap": "39.42",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "CCEP",
+      "name": "Coca-Cola Europacific Partners PLC",
+      "marketcap": "33.67",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "GFS",
+      "name": "GLOBALFOUNDRIES Inc.",
+      "marketcap": "28.20",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "ZS",
+      "name": "Zscaler, Inc.",
+      "marketcap": "27.40",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "MDB",
+      "name": "MongoDB, Inc.",
+      "marketcap": "16.39",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+    {
+      "ticker": "SIRI",
+      "name": "Sirius XM Holdings Inc.",
+      "marketcap": "10.56",
+      "indices": [
+        "NASDAQ100"
+      ]
+    },
+  {
+    "ticker": "ABX-T",
+    "name": "Barrick Gold Corp",
+    "marketcap": 38.887,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "AEM-T",
+    "name": "Agnico Eagle Mines Ltd",
+    "marketcap": 43.961,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "AQN-T",
+    "name": "Algonquin Power and Utilities Corp",
+    "marketcap": 5.49,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "ATD-T",
+    "name": "Alimentation Couche-Tard Inc.",
+    "marketcap": 73.416,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "BAM-T",
+    "name": "Brookfield Asset Management Ltd",
+    "marketcap": 20.457,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "BCE-T",
+    "name": "BCE Inc",
+    "marketcap": 40.888,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "BIP-UN-T",
+    "name": "Brookfield Infra Partners LP Units",
+    "marketcap": 17.154,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "BMO-T",
+    "name": "Bank of Montreal",
+    "marketcap": 83.842,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "BN-T",
+    "name": "Brookfield Corporation",
+    "marketcap": 87.364,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "BNS-T",
+    "name": "Bank of Nova Scotia",
+    "marketcap": 78.262,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CAE-T",
+    "name": "Cae Inc",
+    "marketcap": 7.934,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CAR-UN-T",
+    "name": "CDN Apartment Un",
+    "marketcap": 7.249,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CCL-B-T",
+    "name": "Ccl Industries Inc Cl B NV",
+    "marketcap": 12.799,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CCO-T",
+    "name": "Cameco Corp",
+    "marketcap": 30.594,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CM-T",
+    "name": "Canadian Imperial Bank of Commerce",
+    "marketcap": 61.437,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CNQ-T",
+    "name": "Canadian Natural Resources Ltd.",
+    "marketcap": 98.8,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CNR-T",
+    "name": "Canadian National Railway Co.",
+    "marketcap": 105.425,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CP-T",
+    "name": "Canadian Pacific Kansas City Ltd",
+    "marketcap": 100.033,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CSU-T",
+    "name": "Constellation Software Inc",
+    "marketcap": 79.916,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CTC-A-T",
+    "name": "Canadian Tire Corp Cl A NV",
+    "marketcap": 7.896,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "CVE-T",
+    "name": "Cenovus Energy Inc",
+    "marketcap": 46.742,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "DOL-T",
+    "name": "Dollarama Inc",
+    "marketcap": 34.919,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "EMA-T",
+    "name": "Emera Incorporated",
+    "marketcap": 13.086,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "ENB-T",
+    "name": "Enbridge Inc",
+    "marketcap": 101.691,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "FM-T",
+    "name": "First Quantum Minerals Ltd",
+    "marketcap": 13.495,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "FNV-T",
+    "name": "Franco-Nevada Corp",
+    "marketcap": 30.635,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "FSV-T",
+    "name": "Firstservice Corp",
+    "marketcap": 9.449,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "FTS-T",
+    "name": "Fortis Inc",
+    "marketcap": 26.253,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "GIB-A-T",
+    "name": "CGI Group Inc Cl A Sv",
+    "marketcap": 31.721,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "GIL-T",
+    "name": "Gildan Activewear Inc",
+    "marketcap": 8.768,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "H-T",
+    "name": "Hydro One Ltd",
+    "marketcap": 23.456,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "IFC-T",
+    "name": "Intact Financial Corp",
+    "marketcap": 39.366,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "IMO-T",
+    "name": "Imperial Oil",
+    "marketcap": 47.438,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "K-T",
+    "name": "Kinross Gold Corp",
+    "marketcap": 12.486,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "L-T",
+    "name": "Loblaw CO",
+    "marketcap": 48.179,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "MFC-T",
+    "name": "Manulife Fin",
+    "marketcap": 62.604,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "MG-T",
+    "name": "Magna International Inc",
+    "marketcap": 16.904,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "MRU-T",
+    "name": "Metro Inc",
+    "marketcap": 16.649,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "NA-T",
+    "name": "National Bank of Canada",
+    "marketcap": 37.062,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "NTR-T",
+    "name": "Nutrien Ltd",
+    "marketcap": 34.426,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "OTEX-T",
+    "name": "Open Text Corp",
+    "marketcap": 10.85,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "POW-T",
+    "name": "Power Corp of Canada Sv",
+    "marketcap": 24.928,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "PPL-T",
+    "name": "Pembina Pipeline Corp",
+    "marketcap": 28.739,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "QSR-T",
+    "name": "Restaurant Brands International Inc",
+    "marketcap": 30.097,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "RCI-B-T",
+    "name": "Rogers Communications Inc Cl B NV",
+    "marketcap": 28.097,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "RY-T",
+    "name": "Royal Bank of Canada",
+    "marketcap": 201.337,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "SAP-T",
+    "name": "Saputo Inc",
+    "marketcap": 12.513,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "SHOP-T",
+    "name": "Shopify Inc",
+    "marketcap": 117.896,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "SLF-T",
+    "name": "Sun Life Financial Inc",
+    "marketcap": 38.062,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "SU-T",
+    "name": "Suncor Energy Inc",
+    "marketcap": 64.207,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "T-T",
+    "name": "Telus Corp",
+    "marketcap": 31.654,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "TD-T",
+    "name": "Toronto-Dominion Bank",
+    "marketcap": 129.977,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "TECK-B-T",
+    "name": "Teck Resources Ltd Cl B",
+    "marketcap": 34.015,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "TOU-T",
+    "name": "Tourmaline Oil Corp",
+    "marketcap": 22.214,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "TRI-T",
+    "name": "Thomson Reuters Corp",
+    "marketcap": 103.397,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "TRP-T",
+    "name": "TC Energy Corp",
+    "marketcap": 54.416,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "WCN-T",
+    "name": "Waste Connections Inc",
+    "marketcap": 61.316,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "WN-T",
+    "name": "George Weston Limited",
+    "marketcap": 25.314,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "WPM-T",
+    "name": "Wheaton Precious Metals Corp",
+    "marketcap": 32.788,
+    "indices": [
+      "TSX60"
+    ]
+  },
+  {
+    "ticker": "WSP-T",
+    "name": "WSP Global Inc",
+    "marketcap": 25.971,
+    "indices": [
+      "TSX60"
+    ]
+  }
+];
+
+      // Duplicate entries for each index they belong to
+      // Create the duplicated data array and adjust market cap for TSX60
+      let duplicatedData = [];
+      data.forEach((company) => {
+        company.indices.forEach((index) => {
+          duplicatedData.push({
+            ticker: company.ticker,
+            name: company.name,
+            marketcap:
+              index === "TSX60" ? company.marketcap * 0.73 : company.marketcap,
+            sector: company.sector,
+            idx: index,
+          });
+        });
+      });
+
+
+      const prefix = d3.format("$.2s");
+
+      var width = window.innerWidth,
+        height = window.innerHeight;
+
+      const svg = d3
+        .select("#my_dataviz")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      // Define the centers for each index group
+      const indexCenters = {
+        SP500: { x: 1000, y: height / 2 },
+        NASDAQ100: { x: 1700, y: height / 2 },
+        TSX60: { x: 2100, y: height / 2 },
+      };
+
+      const color = d3
+        .scaleOrdinal()
+        .domain(["SP500", "NASDAQ100", "TSX60"])
+        .range(["#F8766D", "#00BA38", "#619CFF"]);
+
+      // Adjusted size scale for proportional circle areas
+      const size = d3.scaleSqrt().domain([0, 3330]).range([1, 60]);
+
+      const Tooltip = d3.select("body").append("div").attr("class", "tooltip");
+
+      const mouseover = function (event, d) {
+        Tooltip.style("opacity", 1);
+      };
+
+      const mousemove = function (event, d) {
+        Tooltip.html(
+          "<u>" +
+            d.name +
+            " (" +
+            d.ticker +
+            ")</u>" +
+            "<br>" +
+            prefix(d.marketcap * 1000000000).replace(/G/, "B") +
+            " (USD)"
+        )
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY - 20 + "px");
+      };
+
+      const mouseleave = function (event, d) {
+        Tooltip.style("opacity", 0);
+      };
+
+      const logoWidth = 150; // Adjust the width of the logo
+      const logoHeight = 150; // Adjust the height of the logo
+
+      svg
+        .append("image")
+        .attr("xlink:href", "looniesandsense_logo_new.svg") // Path to your PNG file
+        .attr("width", logoWidth)
+        .attr("height", logoHeight)
+        .attr("x", width-200) // Position from the right side
+        .attr("y", height-175); // Position from the bottom
+
+      const nodes = svg
+        .append("g")
+        .selectAll("circle")
+        .data(duplicatedData)
+        .enter()
+        .append("circle")
+        .attr("class", "node")
+        .attr("r", (d) => size(d.marketcap))
+        .style("fill", (d) => color(d.idx))
+        .style("fill-opacity", 0.7)
+        .attr("stroke", "black")
+        .style("stroke-width", 1)
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave);
+
+      // Add text labels for nodes with a large enough radius
+      const labels = svg
+        .append("g")
+        .selectAll("text")
+        .data(duplicatedData)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("text-anchor", "middle")
+        .attr("dy", ".35em")
+        .text((d) => (size(d.marketcap) > 10 ? d.ticker : ""))
+        .style("fill", "black")
+        .style("font-size", "10px");
+
+      const simulation = d3
+        .forceSimulation(duplicatedData)
+        .force(
+          "x",
+          d3
+            .forceX()
+            .strength(1)
+            .x((d) => indexCenters[d.idx].x)
+        )
+        .force(
+          "y",
+          d3
+            .forceY()
+            .strength(1)
+            .y((d) => indexCenters[d.idx].y)
+        )
+        .force(
+          "center",
+          d3
+            .forceCenter()
+            .x(width / 3)
+            .y(height / 2)
+        )
+        .force("charge",
+        d3.forceManyBody()
+        .strength(1))
+        .force(
+          "collide",
+          d3
+            .forceCollide()
+            .strength(2)
+            .radius((d) => size(d.marketcap) + 3)
+            .iterations(3)
+        )
+        .alphaDecay(0.05) // Faster alpha decay
+        .alpha(0.3) // Set higher alpha to start with
+        .restart();
+
+      simulation.on("tick", function () {
+        nodes.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+        labels.attr("x", (d) => d.x).attr("y", (d) => d.y);
+      });
+
+      function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+      }
+
+      function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+
+      nodes.call(
+        d3
+          .drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended)
+      );
+
+      // Create legend
+      const legend = svg
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(125, 25)");
+
+      const legendData = ["SP500", "NASDAQ100", "TSX60"];
+      legend
+        .selectAll(".legend-item")
+        .data(legendData)
+        .enter()
+        .append("g")
+        .attr("class", "legend-item")
+        .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+        .call((g) => {
+          g.append("rect")
+            .attr("class", "legend-rect")
+            .attr("x", width - 500)
+            .attr("y",height - 158)
+            .attr("width", 36)
+            .attr("height", 18)
+            .style("fill", (d) => color(d))
+            .style("opacity", 0.8);
+
+          g.append("text")
+            .attr("x", width - 460)
+            .attr("y", height - 150)
+            .attr("dy", "0.35em")
+            .text(d => d)
+        });
+        
+// Event listener for highlight switch
+const highlightSwitch = d3.select("#highlight-switch");
+highlightSwitch.on("change", function(event) {
+    const isChecked = event.target.checked;
+    nodes.style("fill-opacity", d => {
+        if (isChecked) {
+            const isBothIndices = data.some(company => company.ticker === d.ticker && company.indices.includes("NASDAQ100") && company.indices.includes("SP500"));
+            return isBothIndices ? 0.8 : 0.2;
+        } else {
+            return 0.8; // Reset to normal opacity
+        }
+    });
+});
+
+    </script>
+  </body>
+</html>

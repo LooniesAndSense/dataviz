@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NASDAQ-100 Constituents in 2024</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #chart {
+            display: flex;
+            justify-content: center;
+        }
+        .legend {
+            font-size: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .legend-item {
+            margin-right: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .line {
+            stroke-width: 1.5px;
+        }
+        .highlighted {
+            stroke-width: 3px;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 5px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .hidden {
+            display: none;
+        }
+        .filter-buttons {
+            margin: 20px;
+        }
+        .filter-button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+        }
+        .filter-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>NASDAQ-100 Constituents in 2024</h1>
+    <div id="chart-container">
+        <div id="chart"></div>
+        <div class="tooltip" id="tooltip"></div>
+        <div class="filter-buttons">
+            <button class="filter-button" id="show-positive">Show Positive Returns</button>
+            <button class="filter-button" id="show-negative">Show Negative Returns</button>
+            <button class="filter-button" id="show-all">Show All</button>
+        </div>
+        <div id="legend" class="legend"></div>
+    </div>
+    <script>
+        const url = './nasdaq100_data.json'; // Replace with your JSON file URL
+
+        const width = 1500;
+        const height = 500;
+        const margin = { top: 20, right: 30, bottom: 60, left: 40 };
+
+        const svg = d3.select('#chart')
+            .append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleTime().range([0, width]);
+        const y = d3.scaleLinear().range([height, 0]);
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        const xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat('%b %Y'));
+        const yAxis = d3.axisLeft(y).tickFormat(d => d + '%');
+
+        const tooltip = d3.select("#tooltip");
+
+        let paths;
+        let normalizedData;
+        let allValues;
+
+        // Fetch the JSON data from the URL
+        d3.json(url).then(jsonData => {
+            // Process the JSON data
+            const processedData = processData(jsonData);
+            allValues = processedData.allValues;
+            normalizedData = processedData.normalizedData;
+
+            const xDomain = d3.extent(allValues, d => d.datetime);
+            const yDomain = [d3.min(allValues, d => d.close), d3.max(allValues, d => d.close)];
+
+            x.domain(xDomain);
+            y.domain(yDomain);
+
+            const logoWidth = 150; // Adjust the width of the logo
+            const logoHeight = 150; // Adjust the height of the logo
+
+        svg
+        .append("image")
+        .attr("xlink:href", "../looniesandsense_logo_new.svg") // Path to your PNG file
+        .attr("width", logoWidth)
+        .attr("height", logoHeight)
+        .attr("x", 50) // Position from the right side
+        .attr("y", 0); // Position from the bottom
+
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(xAxis)
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end')
+                .attr('dx', '-0.8em')
+                .attr('dy', '0.15em');
+
+            svg.append('g').call(yAxis);
+
+            const line = d3.line()
+                .x(d => x(d.datetime))
+                .y(d => y(d.close));
+
+            paths = Object.keys(normalizedData).map((symbol, index) => {
+                return svg.append('path')
+                    .datum(normalizedData[symbol])
+                    .attr('class', 'line')
+                    .attr('fill', 'none')
+                    .attr('stroke', color(index))
+                    .attr('stroke-width', 1.5)
+                    .attr('d', line)
+                    .attr('data-symbol', symbol)
+                    .on('mouseover', (event, d) => {
+                        tooltip.style('opacity', 1);
+                    })
+                    .on('mousemove', (event, d) => {
+                        const mouse = d3.pointer(event);
+                        const xDate = x.invert(mouse[0]);
+                        const bisect = d3.bisector(d => d.datetime).left;
+                        const idx = bisect(d, xDate);
+
+                        const d0 = d[idx - 1];
+                        const d1 = d[idx];
+                        const datum = xDate - d0.datetime > d1.datetime - xDate ? d1 : d0;
+                        const symbol = Object.keys(normalizedData)[index];
+
+                        tooltip.html(`Symbol: ${symbol}<br>Date: ${d3.timeFormat("%Y-%m-%d")(datum.datetime)}<br>Performance: ${datum.close.toFixed(2)}%`)
+                            .style('left', `${event.pageX + 5}px`)
+                            .style('top', `${event.pageY - 28}px`);
+                    })
+                    .on('mouseout', () => {
+                        tooltip.style('opacity', 0);
+                    });
+
+                            // Add circles to data points
+        svg.selectAll(`.dot-${symbol}`)
+            .data(normalizedData[symbol])
+            .enter().append('circle')
+            .attr('class', `dot-${symbol}`)
+            .attr('cx', d => x(d.datetime))
+            .attr('cy', d => y(d.close))
+            .attr('r', 3)
+            .attr('fill', color(index))
+            .on('mouseover', (event, d) => {
+                tooltip.style('opacity', 1);
+            })
+            .on('mousemove', (event, d) => {
+                tooltip.html(`Symbol: ${symbol}<br>Date: ${d3.timeFormat("%Y-%m-%d")(d.datetime)}<br>Close: ${d.close.toFixed(2)}%`)
+                    .style('left', `${event.pageX + 5}px`)
+                    .style('top', `${event.pageY - 28}px`);
+            })
+            .on('mouseout', () => {
+                tooltip.style('opacity', 0);
+            });
+
+            });
+
+            // Add legend
+            const legendContainer = d3.select("#legend");
+            const legendItems = legendContainer.selectAll(".legend-item")
+                .data(Object.keys(normalizedData))
+                .enter().append("button")
+                .attr("class", "legend-item")
+                .style("color", (d, i) => color(i))
+                .text(d => d)
+                .on('click', function (event, d) {
+                    const path = paths[Object.keys(normalizedData).indexOf(d)];
+                    const isActive = path.classed('highlighted');
+                    if (isActive) {
+                        svg.selectAll('.line').classed('hidden', false);
+                    } else {
+                        svg.selectAll('.line').classed('hidden', true);
+                        path.classed('hidden', false);
+                    }
+                    path.classed('highlighted', !isActive);
+                });
+
+            // Animation
+            let currentWeek = 0;
+            const maxWeeks = d3.max(Object.values(normalizedData), d => d.length);
+            const delay = 10; // 10ms delay between each week
+
+            function draw() {
+                if (currentWeek >= maxWeeks) return;
+
+                paths.forEach((path, index) => {
+                    const dataToDraw = normalizedData[Object.keys(normalizedData)[index]].slice(0, currentWeek + 1);
+                    path.attr('d', line(dataToDraw));
+                });
+
+                currentWeek++;
+                setTimeout(draw, delay); // Use setTimeout for delay
+            }
+
+            draw();
+
+            // Add filter buttons functionality
+            d3.select("#show-positive").on("click", () => {
+                filterPaths("positive");
+            });
+
+            d3.select("#show-negative").on("click", () => {
+                filterPaths("negative");
+            });
+
+            d3.select("#show-all").on("click", () => {
+                svg.selectAll('.line').classed('hidden', false);
+            });
+
+        }).catch(error => {
+            console.error('Error fetching the JSON data:', error);
+        });
+
+        function filterPaths(type) {
+            svg.selectAll('.line').classed('hidden', true);
+            paths.forEach((path, index) => {
+                const symbol = Object.keys(normalizedData)[index];
+                const lastValue = normalizedData[symbol][normalizedData[symbol].length - 1].close;
+                if ((type === "positive" && lastValue > 0) || (type === "negative" && lastValue < 0)) {
+                    path.classed('hidden', false);
+                }
+            });
+        }
+
+        // Function to process and normalize data
+        function processData(data) {
+            const allValues = [];
+            const normalizedData = {};
+
+            Object.keys(data).forEach(symbol => {
+                const symbolData = data[symbol].map(d => ({
+                    datetime: new Date(d.datetime),
+                    close: +d.close
+                }));
+
+                // Ensure data is sorted by date
+                symbolData.sort((a, b) => a.datetime - b.datetime);
+
+                const initialClose = symbolData[0].close;
+                normalizedData[symbol] = symbolData.map(d => ({
+                    datetime: d.datetime,
+                    close: ((d.close / initialClose) - 1) * 100
+                }));
+
+                allValues.push(...normalizedData[symbol]);
+            });
+
+            return { allValues, normalizedData };
+        }
+    </script>
+</body>
+</html>

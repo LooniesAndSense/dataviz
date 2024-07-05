@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualize The Markets: Global Exchanges</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .label {
+      text-anchor: middle;
+      font-size: 12px;
+    }
+    text.shadow {
+      stroke: black;
+      stroke-width: 1px;
+      opacity: 0.8;
+    }
+    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 6px;
+      font: 12px sans-serif;
+      background: lightsteelblue;
+      border: 0;
+      border-radius: 8px;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <svg width="1200" height="960"></svg>
+  <div class="tooltip" style="opacity:0;"></div>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script>
+
+const data = {
+  "name": "root",
+  "children": [
+    {
+      "name": "Africa",
+      "value": 1133578,
+      "children": [
+        {"name": "Ghana Stock Exchange", "value": 6050, "country": "Ghana"},
+        {"name": "Stock Exchange of Mauritius", "value": 8377, "country": "Mauritius"},
+        {"name": "Bourse de Casablanca", "value": 64341, "country": "Morocco"},
+        {"name": "Botswana Stock Exchange", "value": 3554, "country": "Botswana"},
+        {"name": "The Egyptian Exchange", "value": 63704, "country": "Egypt"},
+        {"name": "Nigerian Exchange", "value": 59141, "country": "Nigeria"},
+        {"name": "Johannesburg Stock Exchange", "value": 971093, "country": "South Africa"},
+        {"name": "Rwanda Stock Exchange", "value": 2918, "country": "Rwanda"}
+      ]
+    },
+    {
+      "name": "Asia",
+      "value": 34113111,
+      "children": [
+        {"name": "Shenzhen Stock Exchange", "value": 3642321, "country": "China"},
+        {"name": "Singapore Exchange", "value": 577451, "country": "Singapore"},
+        {"name": "Colombo Stock Exchange", "value": 12815, "country": "Sri Lanka"},
+        {"name": "Bursa Malaysia", "value": 379172, "country": "Malaysia"},
+        {"name": "Hochiminh Stock Exchange", "value": 192851, "country": "Vietnam"},
+        {"name": "Taiwan Stock Exchange", "value": 1821446, "country": "Taiwan"},
+        {"name": "Taipei Exchange", "value": 180253, "country": "Taiwan"},
+        {"name": "Shanghai Stock Exchange", "value": 6043364, "country": "China"},
+        {"name": "National Stock Exchange of India", "value": 4529520, "country": "India"},
+        {"name": "Hong Kong Exchanges and Clearing", "value": 3599703, "country": "Hong Kong"},
+        {"name": "Korea Exchange", "value": 1795374, "country": "South Korea"},
+        {"name": "Philippine Stock Exchange", "value": 238721, "country": "Philippines"},
+        {"name": "Kazakhstan Stock Exchange", "value": 58918, "country": "Kazakhstan"},
+        {"name": "Japan Exchange Group", "value": 6340070, "country": "Japan"},
+        {"name": "Iran Fara Bourse Securities Exchange", "value": 335034, "country": "Iran"},
+        {"name": "Indonesia Stock Exchange", "value": 723742, "country": "Indonesia"},
+        {"name": "The Stock Exchange of Thailand", "value": 484555, "country": "Thailand"}
+      ]
+    },
+    {
+      "name": "Middle East",
+      "value": 6184014,
+      "children": [
+        {"name": "Abu Dhabi Securities Exchange", "value": 790551, "country": "United Arab Emirates"},
+        {"name": "Dubai Financial Market", "value": 193727, "country": "United Arab Emirates"},
+        {"name": "Boursa Kuwait", "value": 139808, "country": "Kuwait"},
+        {"name": "Tehran Stock Exchange", "value": 1647837, "country": "Iran"},
+        {"name": "Tel-Aviv Stock Exchange", "value": 260488, "country": "Israel"},
+        {"name": "Saudi Exchange (Tadawul)", "value": 2859109, "country": "Saudi Arabia"},
+        {"name": "Palestine Exchange", "value": 4430, "country": "Palestine"},
+        {"name": "Bahrain Bourse", "value": 21606, "country": "Bahrain"},
+        {"name": "Amman Stock Exchange", "value": 24258, "country": "Jordan"}
+      ]
+    },
+    {
+      "name": "Europe",
+      "value": 14687963,
+      "children": [
+        {"name": "Euronext", "value": 6797474, "country": "Europe"},
+        {"name": "Deutsche Boerse AG", "value": 2146008, "country": "Germany"},
+        {"name": "Cyprus Stock Exchange", "value": 9312, "country": "Cyprus"},
+        {"name": "SIX Swiss Exchange", "value": 2025738, "country": "Switzerland"},
+        {"name": "Bulgarian Stock Exchange", "value": 7939, "country": "Bulgaria"},
+        {"name": "Budapest Stock Exchange", "value": 39335, "country": "Hungary"},
+        {"name": "Bucharest Stock Exchange", "value": 47153, "country": "Romania"},
+        {"name": "Borsa Istanbul", "value": 367639, "country": "Turkey"},
+        {"name": "Nasdaq Nordic and Baltics", "value": 2087152, "country": "Nordic and Baltic"},
+        {"name": "Luxembourg Stock Exchange", "value": 52672, "country": "Luxembourg"},
+        {"name": "Ljubljana Stock Exchange", "value": 10457, "country": "Slovenia"},
+        {"name": "Prague Stock Exchange", "value": 32287, "country": "Czech Republic"},
+        {"name": "Warsaw Stock Exchange", "value": 205309, "country": "Poland"},
+        {"name": "Vienna Stock Exchange", "value": 136322, "country": "Austria"},
+        {"name": "BME Spanish Exchanges", "value": 746908, "country": "Spain"},
+        {"name": "Athens Stock Exchange", "value": 83981, "country": "Greece"},
+        {"name": "London Stock Exchange", "value": 3200000, "country": "United Kingdom"}
+      ]
+    },
+    {
+      "name": "North America",
+      "value": 52650411,
+      "children": [
+        {"name": "Nasdaq - US", "value": 23584599, "country": "United States"},
+        {"name": "NYSE", "value": 26006107, "country": "United States"},
+        {"name": "TMX Group", "value": 3059705, "country": "Canada"}
+      ]
+    },
+    {
+      "name": "Latin America",
+      "value": 1871728,
+      "children": [
+        {"name": "Bolsa Nacional de Valores", "value": 2531, "country": "Costa Rica"},
+        {"name": "Bolsa Mexicana de Valores", "value": 563907, "country": "Mexico"},
+        {"name": "Bolsa Latinoamericana de Valores (Latinex)", "value": 19709, "country": "Panama"},
+        {"name": "Bolsa de Comercio de Santiago", "value": 167794, "country": "Chile"},
+        {"name": "Bolsa de Valores de Colombia", "value": 82774, "country": "Colombia"},
+        {"name": "Bolsa de Valores de Lima", "value": 85016, "country": "Peru"},
+        {"name": "Bolsa Electronica de Chile", "value": 96678, "country": "Chile"},
+        {"name": "B3 - Brasil Bolsa Balcão", "value": 928319, "country": "Brazil"}
+      ]
+    },
+    {
+      "name": "Oceania",
+      "value": 1832654,
+      "children": [
+        {"name": "ASX Australian Securities Exchange", "value": 1738668, "country": "Australia"},
+        {"name": "NZX Limited", "value": 93986, "country": "New Zealand"}
+      ]
+    }
+  ]
+};
+
+    const width = 960;
+    const height = 960;
+    const prettyPrint = d3.format("$.3s");
+
+    const parentColor = "#FFFFFF"; // White fill for parents
+    const borderColor = "#000000"; // Black border for parents
+    const childColor = d3.scaleLinear()
+      .domain([0, 30000000*1000000])
+      .range(["hsl(200,80%,80%)", "hsl(200,50%,40%)"])
+      .interpolate(d3.interpolateHcl);
+
+    const pack = data => d3.pack()
+      .size([width, height])
+      .padding(3)
+      (d3.hierarchy(data)
+        .sum(d => d.children ? 0 : d.value*1000000) // Set the value to zero for nodes with children (regions)
+        .eachAfter(d => { // Calculate the sum of the children's values for each region
+          if (d.children) {
+            d.value = d.children.reduce((sum, child) => sum + child.value, 0);
+          }
+        })
+        .sort((a, b) => b.value - a.value));
+
+    const root = pack(data);
+
+    let focus = root;
+    let view;
+
+    const svg = d3.select("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .style("display", "block")
+      .style("margin", "0 -14px")
+      .style("background", "white")
+      .style("cursor", "pointer")
+      .on("click", (event) => zoom(event, root));
+
+// Add the logo image
+const logoWidth = 200; // Adjust the width of the logo
+const logoHeight = 200; // Adjust the height of the logo
+
+svg.append("image")
+  .attr("xlink:href", "looniesandsense_logo_new.svg") // Path to your PNG file
+  .attr("width", logoWidth)
+  .attr("height", logoHeight)
+  .attr("x", width - logoWidth - 5) // Position from the right side
+  .attr("y", height - logoHeight - 5); // Position from the bottom
+
+
+    const tooltip = d3.select(".tooltip");
+
+    const totalValue = root.value;
+
+    const node = svg.append("g")
+      .attr("transform", `translate(${width / 2},${height / 2})`)
+      .selectAll("circle")
+      .data(root.descendants().slice(1))
+      .join("circle")
+      .attr("fill", d => d.data.name === "TMX Group" ? "red" : (d.children ? parentColor : childColor(d.value)))
+      .attr("stroke", d => d.children ? borderColor : null)
+      .attr("pointer-events", d => !d.children ? "none" : null)
+      .on("mouseover", function(event, d) {
+      tooltip.transition().duration(200).style("opacity", .9);
+      tooltip.html(d.data.name + "" + prettyPrint(d.value))
+      .style("left", (event.pageX + 5) + "px")
+      .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {tooltip.transition().duration(500).style("opacity", 0);
+      })
+      .on("click", (event, d) => focus !== d && (zoom(event, d), event.stopPropagation()));
+
+const labelGroup = svg.append("g")
+  .attr("transform", `translate(${width / 2},${height / 2})`)
+  .attr("pointer-events", "none");
+
+const labels = labelGroup.selectAll("g")
+  .data(root.descendants())
+  .join("g")
+  .attr("transform", d => `translate(${d.x},${d.y})`)
+  .style("display", d => d.parent === root ? "inline" : "none");
+
+labels.append("text")
+  .attr("class", "label")
+  .attr("dy", "0.3em")
+  .text(d => d.data.name + (d.data.country ? ` (${d.data.country})` : '') + " " + prettyPrint(d.value) )
+  .each(function(d) {
+    const bbox = this.getBBox();
+    d.bbox = bbox;
+  });
+
+labels.insert("rect", "text")
+  .attr("x", d => d.bbox.x - 2)
+  .attr("y", d => d.bbox.y - 2)
+  .attr("width", d => d.bbox.width + 4)
+  .attr("height", d => d.bbox.height + 4)
+  .style("fill", "black")
+  .style("opacity", 0.5);
+
+labels.select("text")
+  .style("fill", "white");
+
+zoomTo([root.x, root.y, root.r * 2]);
+
+function zoom(event, d) {
+  const focus0 = focus;
+  focus = d;
+
+  const transition = svg.transition()
+    .duration(event.altKey ? 7500 : 750)
+    .tween("zoom", d => {
+      const i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2]);
+      return t => zoomTo(i(t));
+    });
+
+  labels
+    .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+    .transition(transition)
+    .style("fill-opacity", d => d.parent === focus ? 1 : 0)
+    .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+    .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+}
+
+function zoomTo(v) {
+  const k = width / v[2];
+
+  view = v;
+
+  node.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+  node.attr("r", d => d.r * k);
+
+  labels.attr("transform", d => `translate(${(d.x - v[0]) * k},${(d.y - v[1]) * k})`);
+}
+</script>
+</body>
+</html>
